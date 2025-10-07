@@ -24,7 +24,7 @@ library(ezids)
 **Dataset Student Performance**
 
 ```{r, echo=TRUE}
-studperf = read.csv("C:/Users/adgo1/OneDrive/BACKUP/Desktop/INTRO TO DS/GIT/PROJECT 1/Test-1/student_performance.csv", header=T)  
+studperf = read.csv("C:/Users/Ebrima/Desktop/1st Sem GWU/Intro. Data Science/student_performance.csv", header=T)  
 str(studperf)
 head(studperf)
 tail(studperf)
