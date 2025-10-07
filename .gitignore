@@ -1,0 +1,9 @@
+# Ignore large CSV datasets
+DataCoSupplyChainDataset.csv
+
+# Optional: ignore R temporary files
+.Rhistory
+Project 1 Grading.xlsx
+Project_1_2025FA_11.pdf
+HW06_HTs.Rmd
+
