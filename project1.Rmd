@@ -71,6 +71,7 @@ library(ggplot2)
 ggplot(data=studperf, aes(x=weekly_self_study_hours) ) + 
 geom_histogram(  col="white", 
                  fill="red", 
+                 fill="orange", 
                  alpha = .8, # opacity
                  bins = 60) + 
   labs(
