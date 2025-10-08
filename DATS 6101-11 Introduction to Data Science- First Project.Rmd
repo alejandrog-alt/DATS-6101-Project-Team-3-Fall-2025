@@ -1,16 +1,22 @@
 ---
 title: "DATS 6101-11 Introduction to Data Science: First Project"
-author: "Team 3 : Alejandro, Ebrima, Vidyullatha"
+author: 'Team 3 : Alejandro, Ebrima, Vidyullatha'
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    code_folding: show
-    number_sections: false
-    toc: yes
-    toc_depth: 3
-    toc_float: yes
   pdf_document:
-    toc: yes
+    toc: true
+    toc_depth: '3'
+  html_document:
+    theme: cerulean
+    highlight: tango
+    code_folding: show
+    toc_depth: 3
+    toc_float: true
+    toc: true
+    number_sections: true
+    df_print: paged
+  word_document:
+    toc: true
     toc_depth: '3'
 ---
 
@@ -35,28 +41,33 @@ options(scientific=T, digits = 3)
 **Load the dataset into R**
 ```{r}
 library(readr)
-df <- read_csv("./data/StudentsPerformance.csv")
+studperf <- read_csv("StudentsPerformance.csv")
 ```
 
 **Display the first 5 records**
 ```{r}
-head(df, 5)
+head(studperf, 5)
 ```
+
+```{r}
+```
+
 
 **Structure of dataset (variable types)**
 ```{r}
-str(df)
+str(studperf)
 ```
 
 **Basic summary statistics**
 ```{r}
-summary(df)
+summary(studperf)
+xkablesummary(studperf)
 ```
 
 **Column names and unique values**
 ```{r}
-names(df)
-sapply(df, function(x) length(unique(x)))
+names(studperf)
+sapply(studperf, function(x) length(unique(x)))
 ```
 
 
@@ -64,35 +75,35 @@ sapply(df, function(x) length(unique(x)))
 
 **How many observations are in this data set?**
 ```{r, echo=TRUE}
-length(df)
-nrow(df)
-dim(df)
+length(studperf)
+nrow(studperf)
+dim(studperf)
 ```
-**Answer:** The number of observations in this data set is `r nrow(df)`.
+**Answer:** The number of observations in this data set is `r nrow(studperf)`.
 
 **How many observations having missing (NA) values?**
 ```{r}
-sum(is.na(df$weekly_self_study_hours))
-sum(is.na(df$attendance_percentage))
-sum(is.na(df$class_participation))
-sum(is.na(df$total_score))
+sum(is.na(studperf$weekly_self_study_hours))
+sum(is.na(studperf$attendance_percentage))
+sum(is.na(studperf$class_participation))
+sum(is.na(studperf$total_score))
 ```
 **Answer:** There are no missing values.
 
 **Converting `grade` to a factor variable**
 ```{r, echo=TRUE}
-df$grade <- as.factor(df$grade)
-summary(df)
+studperf$grade <- as.factor(studperf$grade)
+summary(studperf)
 ```
 
-**Looking at new summary statistics nicely**
+**Looking at new summary statistics nicely: Using the ezids package**
 
 ```{r, echo=TRUE}
-xkablesummary(df['weekly_self_study_hours'], title = "Weekly Self Study Hours")
-xkablesummary(df['attendance_percentage'], title = "Attendance Percentage")
-xkablesummary(df['class_participation'], title = "Class Participation")
-xkablesummary(df['total_score'], title = "Total Score")
-xkablesummary(df['grade'], title = "Grade")
+xkablesummary(studperf['weekly_self_study_hours'], title = "Weekly Self Study Hours")
+xkablesummary(studperf['attendance_percentage'], title = "Attendance Percentage")
+xkablesummary(studperf['class_participation'], title = "Class Participation")
+xkablesummary(studperf['total_score'], title = "Total Score")
+xkablesummary(studperf['grade'], title = "Grade")
 ```
 
 # 3. Graphical representations of the data
@@ -102,46 +113,46 @@ xkablesummary(df['grade'], title = "Grade")
 
 library(ggplot2)
 
-ggplot(data=df, aes(x=weekly_self_study_hours) ) + 
+ggplot(data=studperf, aes(x=weekly_self_study_hours) ) + 
 geom_histogram(  col="white", 
                  fill="orange", 
                  alpha = .8, # opacity
-                 bins = 60) + 
+                 bins = 50) + 
   labs(
         x="Weekly Self Study Hours", 
         y="Frequency",
-        title="Histogram of Weekly Self Study Hours in df Dataset") 
+        title="Histogram of Weekly Self Study Hours in student performance Dataset") 
 
-ggplot( data=df, aes(x=attendance_percentage) ) + 
+ggplot( data=studperf, aes(x=attendance_percentage) ) + 
 geom_histogram(  col="white", 
                  fill="blue", 
                  alpha = .8, # opacity
-                 bins = 60) + 
+                 bins = 50) + 
   labs(
         x="Attendance Percentage", 
         y="Frequency",
         title="Histogram of Attendance Percentage in df Dataset") 
 
-ggplot( data=df, aes(x=total_score) ) + 
+ggplot( data=studperf, aes(x=total_score) ) + 
 geom_histogram(  col="white", 
                  fill="blue", 
                  alpha = .8, # opacity
-                 bins = 60) + 
+                 bins = 50) + 
   labs(
         x="Total Score", 
         y="Frequency",
-        title="Histogram of Total Score in df Dataset") 
+        title="Histogram of Total Score in student performance Dataset") 
 
 
-ggplot(df, aes(y = class_participation) ) +
+ggplot(studperf, aes(y = class_participation) ) +
   geom_boxplot( colour = "orange",       
                 fill   = "#7777cc",      
                 outlier.colour = "red",  # outlier points color
-                outlier.shape  = 8,      # outlier symbol
-                outlier.size   = 4       # outlier point size
+                outlier.shape  = 6,      # outlier symbol
+                outlier.size   = 3       # outlier point size
                ) +
   labs(
-        title = "Boxplot of Class Participation in df Dataset",
+        title = "Boxplot of Class Participation in student performance Dataset",
         x = "",
         y = "Class Participation"
   )
@@ -150,22 +161,22 @@ ggplot(df, aes(y = class_participation) ) +
 **Removing outliers**
 ```{r echo=TRUE}
 
-df2 = outlierKD2(df, weekly_self_study_hours, qqplt = TRUE)
-df3 = outlierKD2(df2, attendance_percentage, qqplt = TRUE)
-df4 = outlierKD2(df3, class_participation, qqplt = TRUE)
-df5 = outlierKD2(df4, total_score, qqplt = TRUE)
+studperf2 = outlierKD2(studperf, weekly_self_study_hours, qqplt = TRUE)
+studperf3 = outlierKD2(studperf2, attendance_percentage, qqplt = TRUE)
+studperf4 = outlierKD2(studperf3, class_participation, qqplt = TRUE)
+studperf5 = outlierKD2(studperf4, total_score, qqplt = TRUE)
 
-qqnorm(df2$weekly_self_study_hours, main = "QQ Plot of Weekly Self Study Hours (outliers removed)")
-qqline(df2$weekly_self_study_hours, col = "red")
+qqnorm(studperf2$weekly_self_study_hours, main = "QQ Plot of Weekly Self Study Hours (outliers removed)")
+qqline(studperf2$weekly_self_study_hours, col = "red")
 
-qqnorm(df3$attendance_percentage, main = "QQ Plot of Attendance Percentage (outliers removed)")
-qqline(df3$attendance_percentage, col = "red")
+qqnorm(studperf3$attendance_percentage, main = "QQ Plot of Attendance Percentage (outliers removed)")
+qqline(studperf3$attendance_percentage, col = "red")
 
-qqnorm(df4$class_participation, main = "QQ Plot of Class Participation (outliers removed)")
-qqline(df4$class_participation, col = "blue")
+qqnorm(studperf4$class_participation, main = "QQ Plot of Class Participation (outliers removed)")
+qqline(studperf4$class_participation, col = "blue")
 
-qqnorm(df5$total_score, main = "QQ Plot of Total Score (outliers removed)")
-qqline(df5$total_score, col = "blue")
+qqnorm(studperf5$total_score, main = "QQ Plot of Total Score (outliers removed)")
+qqline(studperf5$total_score, col = "blue")
 
 ```
 
@@ -173,7 +184,7 @@ qqline(df5$total_score, col = "blue")
 **A Scatterplot between Weekly Self Study Hours and Class Participation, with points colored by Grade **
 ```{r echo=TRUE}
 
-ggplot(df, aes(x =weekly_self_study_hours , y = class_participation, color = grade)) +
+ggplot(studperf, aes(x =weekly_self_study_hours , y = class_participation, color = grade)) +
   geom_point(size = 3, alpha = 0.7) +
   labs(
     title = "Scatterplot of Weekly Self Study Hours and Class Participation Colored by Grade",
