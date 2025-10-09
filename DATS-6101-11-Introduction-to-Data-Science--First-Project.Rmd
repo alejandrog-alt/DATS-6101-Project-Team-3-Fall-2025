@@ -6,7 +6,7 @@ output:
   html_document:
     theme: "cerulean"
     highlight: tango
-    code_folding: show
+    code_folding: hide
     toc_depth: 3
     toc_float: yes
     toc: yes
@@ -53,7 +53,6 @@ str(studperf)
 **Basic summary statistics**
 ```{r}
 summary(studperf)
-xkablesummary(studperf)
 ```
 **Variance, mean, and sd for each column**
 
@@ -64,7 +63,7 @@ study_hours_sd   <- sd(studperf$weekly_self_study_hours, na.rm = T)
 
 attendance_var   <- var(studperf$attendance_percentage, na.rm = T)
 attendance_mean  <- mean(studperf$attendance_percentage , na.rm = T)
-attendances_sd   <- sd(studperf$attendance_percentage, na.rm = T)
+attendance_sd   <- sd(studperf$attendance_percentage, na.rm = T)
 
 participation_var  <- var(studperf$class_participation, na.rm = T)
 participation_mean <- mean(studperf$class_participation , na.rm = T)
@@ -75,20 +74,20 @@ total_score_mean <- mean(studperf$total_score, na.rm = T)
 total_score_sd   <- sd(studperf$total_score, na.rm = T)
 
 ```
-Study Hours Var: `r study_hours_var` 
-Study Hours Mean: `r study_hours_mean` 
+Study Hours Var: `r study_hours_var`;
+Study Hours Mean: `r study_hours_mean`; 
 Study Hours SD: `r study_hours_sd`
 
-Attendance Var: `r attendance_var` 
-Attendance Mean: `r attendance_mean` 
+Attendance Var: `r attendance_var`; 
+Attendance Mean: `r attendance_mean`; 
 Attendance SD: `r attendance_sd`
 
-Participation Var: `r participation_var` 
-Participation Mean: `r participation_mean` 
+Participation Var: `r participation_var`; 
+Participation Mean: `r participation_mean`; 
 Participation SD: `r participation_sd`
 
-Total Score Var: `r total_score_var` 
-Total Score Mean: `r total_score_mean` 
+Total Score Var: `r total_score_var`; 
+Total Score Mean: `r total_score_mean`; 
 Total Score SD: `r total_score_sd`
 
 **Column names and unique values**
@@ -102,8 +101,8 @@ sapply(studperf, function(x) length(unique(x)))
 
 **How many observations are in this data set?**
 ```{r, echo=TRUE}
-length(studperf)
-nrow(studperf)
+#length(studperf)
+#nrow(studperf)
 dim(studperf)
 ```
 **Answer:** The number of observations in this data set is `r nrow(studperf)`.
@@ -195,22 +194,42 @@ ggplot(plot_studperf, aes(x=grade)) +
 **Removing outliers**
 ```{r echo=TRUE}
 
-studperf2 = outlierKD2(studperf, weekly_self_study_hours, qqplt = TRUE)
-studperf3 = outlierKD2(studperf2, attendance_percentage, qqplt = TRUE)
-studperf4 = outlierKD2(studperf3, class_participation, qqplt = TRUE)
-studperf5 = outlierKD2(studperf4, total_score, qqplt = TRUE)
+studperfclean = outlierKD2(studperf, weekly_self_study_hours, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
+studperfclean2 = outlierKD2(studperfclean, attendance_percentage, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
+studperfclean3 = outlierKD2(studperfclean2, class_participation, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
+studperfclean4 = outlierKD2(studperfclean3, total_score, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
+```
 
-qqnorm(studperf2$weekly_self_study_hours, main = "QQ Plot of Weekly Self Study Hours (outliers removed)")
-qqline(studperf2$weekly_self_study_hours, col = "red")
+Checking the dataframe again:
 
-qqnorm(studperf3$attendance_percentage, main = "QQ Plot of Attendance Percentage (outliers removed)")
-qqline(studperf3$attendance_percentage, col = "red")
+```{r}
+studperf_summary <- studperfclean4
+colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
+xkablesummary(studperf_summary)
+```
 
-qqnorm(studperf4$class_participation, main = "QQ Plot of Class Participation (outliers removed)")
-qqline(studperf4$class_participation, col = "blue")
+The outliers were replaced by NAs. They were not deleted from the df. 
 
-qqnorm(studperf5$total_score, main = "QQ Plot of Total Score (outliers removed)")
-qqline(studperf5$total_score, col = "blue")
+```{r}
+sum(is.na(studperfclean4$weekly_self_study_hours))
+sum(is.na(studperfclean4$attendance_percentage))
+sum(is.na(studperfclean4$class_participation))
+sum(is.na(studperfclean4$total_score))
+```
+
+**Removing NaN**
+```{r}
+
+studperfclean4 <- drop_na(studperfclean4,
+                    weekly_self_study_hours,
+                    attendance_percentage,
+                    class_participation,
+                    total_score)
+
+sum(is.na(studperfclean4$weekly_self_study_hours))
+sum(is.na(studperfclean4$attendance_percentage))
+sum(is.na(studperfclean4$class_participation))
+sum(is.na(studperfclean4$total_score))
 
 ```
 
