@@ -199,6 +199,7 @@ studperfclean2 = outlierKD2(studperfclean, attendance_percentage, rm = TRUE, box
 studperfclean3 = outlierKD2(studperfclean2, class_participation, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 studperfclean4 = outlierKD2(studperfclean3, total_score, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 ```
+**Q4 What are the average weekly study hours, attendance percentage, class participation, and total scores for all students in the dataset?**
 
 Checking the dataframe again:
 
@@ -237,7 +238,7 @@ sum(is.na(studperfclean4$total_score))
 **A Scatterplot between Weekly Self Study Hours and Class Participation, with points colored by Grade **
 ```{r echo=TRUE}
 
-ggplot(studperf, aes(x =weekly_self_study_hours , y = class_participation, color = grade)) +
+ggplot(studperfclean4, aes(x =weekly_self_study_hours , y = class_participation, color = grade)) +
   geom_point(size = 3, alpha = 0.7) +
   labs(
     title = "Scatterplot of Weekly Self Study Hours and Class Participation Colored by Grade",
@@ -247,6 +248,51 @@ ggplot(studperf, aes(x =weekly_self_study_hours , y = class_participation, color
   ) +
   theme_minimal()
 ```
+**Q3: Are there any students who dedicate very few hours to studying but still achieve a higher  total_score? **
+
+```{r echo=TRUE}
+
+# cutoffs
+low_hours  <- quantile(studperfclean4$weekly_self_study_hours, 0.20, na.rm=TRUE)
+high_score <- quantile(studperfclean4$total_score, 0.90, na.rm=TRUE)
+
+# pick the students
+few_but_high <- subset(studperfclean4,
+  weekly_self_study_hours <= low_hours & total_score >= high_score)
+
+nrow(few_but_high); head(few_but_high)
+
+```
+**Q5 Do students with unusually high total_score despite low study hours, attendance, and participation show significant anomalies?**
+
+Low-effort and high scorers
+
+```{r echo=TRUE}
+
+# low-effort = bottom 20% on all three
+q <- with(studperfclean4, data.frame(
+  study = quantile(weekly_self_study_hours, 0.20, na.rm=TRUE),
+  att   = quantile(attendance_percentage,   0.20, na.rm=TRUE),
+  part  = quantile(class_participation,     0.20, na.rm=TRUE)
+))
+
+# Using subset
+low <- subset(studperfclean4,
+  weekly_self_study_hours <= q$study &
+  attendance_percentage   <= q$att   &
+  class_participation     <= q$part)
+
+# Unusually High = top ~2.3% within LOW group (≈ Z > 2 equivalent)
+cut97 <- quantile(low$total_score, 0.977, na.rm=TRUE)
+low$anomaly <- low$total_score > cut97
+
+c(n_low = nrow(low),
+  cutoff = cut97,
+  observed = sum(low$anomaly),
+  rate = mean(low$anomaly) )
+```
+
+
 
 
 
