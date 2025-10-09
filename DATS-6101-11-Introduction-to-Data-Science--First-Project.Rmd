@@ -86,7 +86,7 @@ sum(is.na(studperf$total_score))
 
 **Converting `grade` to a factor variable**
 ```{r, echo=TRUE}
-studperf$grade <- as.factor(studperf$grade)
+studperf$grade <- factor(studperf$grade, levels = c("F","D","C","B","A"), ordered = TRUE)
 summary(studperf)
 ```
 
