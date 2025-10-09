@@ -18,6 +18,8 @@ output:
 # Frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
 library(devtools)
 library(ezids)
+library(dplyr)
+library(tidyverse)
 ```
 
 
@@ -43,10 +45,6 @@ studperf <- read_csv("StudentsPerformance.csv")
 head(studperf, 5)
 ```
 
-```{r}
-```
-
-
 **Structure of dataset (variable types)**
 ```{r}
 str(studperf)
@@ -57,6 +55,41 @@ str(studperf)
 summary(studperf)
 xkablesummary(studperf)
 ```
+**Variance, mean, and sd for each column**
+
+```{r, echo=TRUE}
+study_hours_var  <- var(studperf$weekly_self_study_hours, na.rm = T)
+study_hours_mean <- mean(studperf$weekly_self_study_hours , na.rm = T)
+study_hours_sd   <- sd(studperf$weekly_self_study_hours, na.rm = T)
+
+attendance_var   <- var(studperf$attendance_percentage, na.rm = T)
+attendance_mean  <- mean(studperf$attendance_percentage , na.rm = T)
+attendances_sd   <- sd(studperf$attendance_percentage, na.rm = T)
+
+participation_var  <- var(studperf$class_participation, na.rm = T)
+participation_mean <- mean(studperf$class_participation , na.rm = T)
+participation_sd   <- sd(studperf$class_participation, na.rm = T)
+
+total_score_var  <- var(studperf$total_score, na.rm = T)
+total_score_mean <- mean(studperf$total_score, na.rm = T)
+total_score_sd   <- sd(studperf$total_score, na.rm = T)
+
+```
+Study Hours Var: `r study_hours_var` 
+Study Hours Mean: `r study_hours_mean` 
+Study Hours SD: `r study_hours_sd`
+
+Attendance Var: `r attendance_var` 
+Attendance Mean: `r attendance_mean` 
+Attendance SD: `r attendance_sd`
+
+Participation Var: `r participation_var` 
+Participation Mean: `r participation_mean` 
+Participation SD: `r participation_sd`
+
+Total Score Var: `r total_score_var` 
+Total Score Mean: `r total_score_mean` 
+Total Score SD: `r total_score_sd`
 
 **Column names and unique values**
 ```{r}
@@ -93,11 +126,9 @@ summary(studperf)
 **Looking at new summary statistics nicely: Using the ezids package**
 
 ```{r, echo=TRUE}
-xkablesummary(studperf['weekly_self_study_hours'], title = "Weekly Self Study Hours")
-xkablesummary(studperf['attendance_percentage'], title = "Attendance Percentage")
-xkablesummary(studperf['class_participation'], title = "Class Participation")
-xkablesummary(studperf['total_score'], title = "Total Score")
-xkablesummary(studperf['grade'], title = "Grade")
+studperf_summary <- studperf
+colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
+xkablesummary(studperf_summary)
 ```
 
 # 3. Graphical representations of the data
@@ -107,49 +138,58 @@ xkablesummary(studperf['grade'], title = "Grade")
 
 library(ggplot2)
 
-ggplot(data=studperf, aes(x=weekly_self_study_hours) ) + 
+# Downsample for plotting if huge
+plot_studperf <- studperf %>% sample_n(min(5000, nrow(studperf)))
+
+ggplot(data=plot_studperf, aes(x=weekly_self_study_hours) ) + 
 geom_histogram(  col="white", 
-                 fill="orange", 
+                 fill="red", 
                  alpha = .8, # opacity
-                 bins = 50) + 
+                 bins = 60) + 
   labs(
         x="Weekly Self Study Hours", 
         y="Frequency",
-        title="Histogram of Weekly Self Study Hours in student performance Dataset") 
+        title="Histogram of Weekly Self Study Hours in Student Performance Dataset") 
 
-ggplot( data=studperf, aes(x=attendance_percentage) ) + 
+
+ggplot( data=plot_studperf, aes(x=attendance_percentage) ) + 
 geom_histogram(  col="white", 
                  fill="blue", 
                  alpha = .8, # opacity
-                 bins = 50) + 
+                 bins = 60) + 
   labs(
         x="Attendance Percentage", 
         y="Frequency",
-        title="Histogram of Attendance Percentage in df Dataset") 
+        title="Histogram of Attendance Percentage in Student Performance Dataset")
 
-ggplot( data=studperf, aes(x=total_score) ) + 
+ggplot( data=plot_studperf, aes(x=class_participation) ) + 
 geom_histogram(  col="white", 
-                 fill="blue", 
+                 fill="orange", 
                  alpha = .8, # opacity
-                 bins = 50) + 
+                 bins = 60) + 
+  labs(
+        x="Class Participation", 
+        y="Frequency",
+        title="Histogram of Class Participation in Student Performance Dataset") 
+
+ggplot( data=plot_studperf, aes(x=total_score) ) + 
+geom_histogram(  col="white", 
+                 fill="green", 
+                 alpha = .8, # opacity
+                 bins = 60) + 
   labs(
         x="Total Score", 
         y="Frequency",
-        title="Histogram of Total Score in student performance Dataset") 
+        title="Histogram of Total Score in Student Performance Dataset") 
 
-
-ggplot(studperf, aes(y = class_participation) ) +
-  geom_boxplot( colour = "orange",       
-                fill   = "#7777cc",      
-                outlier.colour = "red",  # outlier points color
-                outlier.shape  = 6,      # outlier symbol
-                outlier.size   = 3       # outlier point size
-               ) +
+ggplot(plot_studperf, aes(x=grade)) + 
+  geom_bar( col="white", 
+                 fill="purple", 
+                 alpha = .8) + 
   labs(
-        title = "Boxplot of Class Participation in student performance Dataset",
-        x = "",
-        y = "Class Participation"
-  )
+        x="Grade", 
+        y="Frequency",
+        title="Barplot of Grade in Student Performance Dataset") 
 ```
 
 **Removing outliers**
