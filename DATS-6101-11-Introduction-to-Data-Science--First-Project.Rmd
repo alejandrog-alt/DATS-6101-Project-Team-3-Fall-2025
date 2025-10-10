@@ -32,30 +32,30 @@ options(scientific=T, digits = 3)
 # options(scipen=9, digits = 3) 
 ```
 
-# 1. Summary of the dataset 
+# Summary of the dataset 
 
-**Load the dataset into R**
+Load the dataset into R
 ```{r}
 library(readr)
-studperf <- read_csv("StudentsPerformance.csv")
+studperf <- read_csv("./data/StudentsPerformance.csv")
 ```
 
-**Display the first 5 records**
+Display the first 5 records
 ```{r}
 head(studperf, 5)
 ```
 
-**Structure of dataset (variable types)**
+Structure of dataset (variable types)
 ```{r}
 str(studperf)
 ```
 
-**Basic summary statistics**
+Basic summary statistics
 ```{r}
 summary(studperf)
 ```
-**Variance, mean, and sd for each column**
 
+Variance, mean, and standard deviation for each column
 ```{r, echo=TRUE}
 study_hours_var  <- var(studperf$weekly_self_study_hours, na.rm = T)
 study_hours_mean <- mean(studperf$weekly_self_study_hours , na.rm = T)
@@ -74,30 +74,39 @@ total_score_mean <- mean(studperf$total_score, na.rm = T)
 total_score_sd   <- sd(studperf$total_score, na.rm = T)
 
 ```
-Study Hours Var: `r study_hours_var`;
-Study Hours Mean: `r study_hours_mean`; 
-Study Hours SD: `r study_hours_sd`
 
-Attendance Var: `r attendance_var`; 
-Attendance Mean: `r attendance_mean`; 
-Attendance SD: `r attendance_sd`
+**Study Hours: **
+- Variance: `r study_hours_var`;
+- Mean: `r study_hours_mean`; 
+- Stabdard Deviation: `r study_hours_sd`
 
-Participation Var: `r participation_var`; 
-Participation Mean: `r participation_mean`; 
-Participation SD: `r participation_sd`
+**Attendance: **
+- Variance: `r attendance_var`; 
+- Mean: `r attendance_mean`; 
+- Stabdard Deviation: `r attendance_sd`
 
-Total Score Var: `r total_score_var`; 
-Total Score Mean: `r total_score_mean`; 
-Total Score SD: `r total_score_sd`
+**Participation: **
+- Variance: `r participation_var`; 
+- Mean: `r participation_mean`; 
+- Stabdard Deviation: `r participation_sd`
 
-**Column names and unique values**
+**Total Score: **
+- Variance: `r total_score_var`; 
+- Mean: `r total_score_mean`; 
+- Stabdard Deviation: `r total_score_sd`
+
+
+Column names
 ```{r}
 names(studperf)
+```
+
+Unique values
+```{r}
 sapply(studperf, function(x) length(unique(x)))
 ```
 
-
-# 2. Descriptive statistics
+# Descriptive statistics
 
 **How many observations are in this data set?**
 ```{r, echo=TRUE}
@@ -105,6 +114,7 @@ sapply(studperf, function(x) length(unique(x)))
 #nrow(studperf)
 dim(studperf)
 ```
+
 **Answer:** The number of observations in this data set is `r nrow(studperf)`.
 
 **How many observations having missing (NA) values?**
@@ -114,25 +124,25 @@ sum(is.na(studperf$attendance_percentage))
 sum(is.na(studperf$class_participation))
 sum(is.na(studperf$total_score))
 ```
+
 **Answer:** There are no missing values.
 
-**Converting `grade` to a factor variable**
+Converting `grade` to a factor variable
 ```{r, echo=TRUE}
 studperf$grade <- factor(studperf$grade, levels = c("F","D","C","B","A"), ordered = TRUE)
 summary(studperf)
 ```
 
-**Looking at new summary statistics nicely: Using the ezids package**
-
+Looking at new summary statistics nicely: Using the ezids package
 ```{r, echo=TRUE}
 studperf_summary <- studperf
 colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
 xkablesummary(studperf_summary)
 ```
 
-# 3. Graphical representations of the data
+# Graphical representations of the data
 
-**Including Plots**
+Including Plots
 ```{r echo=TRUE}
 
 library(ggplot2)
@@ -191,7 +201,7 @@ ggplot(plot_studperf, aes(x=grade)) +
         title="Barplot of Grade in Student Performance Dataset") 
 ```
 
-**Removing outliers**
+Removing outliers
 ```{r echo=TRUE}
 
 studperfclean = outlierKD2(studperf, weekly_self_study_hours, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
@@ -199,17 +209,73 @@ studperfclean2 = outlierKD2(studperfclean, attendance_percentage, rm = TRUE, box
 studperfclean3 = outlierKD2(studperfclean2, class_participation, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 studperfclean4 = outlierKD2(studperfclean3, total_score, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 ```
-**Q4 What are the average weekly study hours, attendance percentage, class participation, and total scores for all students in the dataset?**
+
+# Answering the SMART QUESTIONS: 
+
+### Q1: Do students with attendance ≥ 85% achieve higher average total scores than those with attendance < 85%?
+
+```{r}
+high_attend <- subset(studperf, attendance_percentage >= 85)
+low_attend  <- subset(studperf, attendance_percentage < 85)
+```
+
+Calculate averages for attendance percentatge >= 85 and attendance percentatge < 85
+```{r}
+high_mean <- mean(high_attend$total_score)
+high_mean <- mean(low_attend$total_score)
+```
+
+T-test to check significance
+```{r}
+t.test(total_score ~ attendance_percentage >= 85, data = studperf)
+```
+
+**Answer:** The students with attendance ≥ 85% have an average total score of `r mean(high_attend$total_score)` compared to `r mean(low_attend$total_score)` for students with attendance < 85%.
+
+
+### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
+
+Correlation
+```{r}
+correlation <- cor(studperf$weekly_self_study_hours, studperf$total_score, use = "complete.obs")
+```
+
+Simple linear regression
+```{r}
+model <- lm(total_score ~ weekly_self_study_hours, data = studperf)
+slope <- coef(model)[2]
+p_value <- summary(model)$coefficients[2, 4]
+```
+
+Plot
+```{r}
+ggplot(studperf, aes(x = weekly_self_study_hours, y = total_score)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(
+    title = "Relationship between Study Hours and Total Score",
+    x = "Weekly Self-Study Hours",
+    y = "Total Score"
+  )
+```
+
+
+**Answer:** The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`, suggesting a `r ifelse(correlation > 0, "positive", "negative")` linear relationship.
+From the regression model, the slope coefficient is `r round(slope, 3)` with a p-value of `r signif(p_value, 3)`.
+This indicates that for each additional hour of self-study per week, the total score increases by approximately `r round(slope, 2)` points.
+Given that the p-value is `r ifelse(p_value < 0.05, "less than 0.05", "greater than 0.05")`, the relationship is `r ifelse(p_value < 0.05, "statistically significant", "not statistically significant")`.
+Therefore, there `r ifelse(p_value < 0.05, "is", "is no")` evidence of a meaningful linear relationship between weekly self-study hours and total scores.
+
+### Q4 : What are the average weekly study hours, attendance percentage, class participation, and total scores for all students in the dataset?
 
 Checking the dataframe again:
-
 ```{r}
 studperf_summary <- studperfclean4
 colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
 xkablesummary(studperf_summary)
 ```
 
-The outliers were replaced by NAs. They were not deleted from the df. 
+Note: The outliers were replaced by NAs. They were not deleted from the df. 
 
 ```{r}
 sum(is.na(studperfclean4$weekly_self_study_hours))
@@ -218,9 +284,8 @@ sum(is.na(studperfclean4$class_participation))
 sum(is.na(studperfclean4$total_score))
 ```
 
-**Removing NaN**
+Removing NaN
 ```{r}
-
 studperfclean4 <- drop_na(studperfclean4,
                     weekly_self_study_hours,
                     attendance_percentage,
@@ -231,11 +296,10 @@ sum(is.na(studperfclean4$weekly_self_study_hours))
 sum(is.na(studperfclean4$attendance_percentage))
 sum(is.na(studperfclean4$class_participation))
 sum(is.na(studperfclean4$total_score))
-
 ```
 
 
-**A Scatterplot between Weekly Self Study Hours and Class Participation, with points colored by Grade **
+A Scatterplot between Weekly Self Study Hours and Class Participation, with points colored by Grade
 ```{r echo=TRUE}
 
 ggplot(studperfclean4, aes(x =weekly_self_study_hours , y = class_participation, color = grade)) +
@@ -248,7 +312,9 @@ ggplot(studperfclean4, aes(x =weekly_self_study_hours , y = class_participation,
   ) +
   theme_minimal()
 ```
-**Q3: Are there any students who dedicate very few hours to studying but still achieve a higher  total_score? **
+
+
+### Q3: Are there any students who dedicate very few hours to studying but still achieve a higher  total_score?
 
 ```{r echo=TRUE}
 
@@ -263,7 +329,8 @@ few_but_high <- subset(studperfclean4,
 nrow(few_but_high); head(few_but_high)
 
 ```
-**Q5 Do students with unusually high total_score despite low study hours, attendance, and participation show significant anomalies?**
+
+### Q5: Do students with unusually high total_score despite low study hours, attendance, and participation show significant anomalies?
 
 Low-effort and high scorers
 
