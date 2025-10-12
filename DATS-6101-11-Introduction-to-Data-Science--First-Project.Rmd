@@ -201,7 +201,8 @@ ggplot(plot_studperf, aes(x=grade)) +
         title="Barplot of Grade in Student Performance Dataset") 
 ```
 
-Removing outliers
+*Outlier Check for the variables: weekly study hours, attendance, class participation and total score. We use the ezids package*
+
 ```{r echo=TRUE}
 
 studperfclean = outlierKD2(studperf, weekly_self_study_hours, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
@@ -218,19 +219,28 @@ studperfclean4 = outlierKD2(studperfclean3, total_score, rm = TRUE, boxplt = TRU
 high_attend <- subset(studperf, attendance_percentage >= 85)
 low_attend  <- subset(studperf, attendance_percentage < 85)
 ```
+```{r}
+# Create a new categorical variable for attendance
+studperf$attendance_group <- ifelse(studperf$attendance_percentage >= 85, "High (≥85%)", "Low (<85%)")
 
-Calculate averages for attendance percentatge >= 85 and attendance percentatge < 85
+table(studperf$attendance_group)
+
+```
+
+Calculate averages for attendance percentage >= 85 and attendance percentage < 85
 ```{r}
 high_mean <- mean(high_attend$total_score)
+
 high_mean <- mean(low_attend$total_score)
 ```
+
 
 T-test to check significance
 ```{r}
 t.test(total_score ~ attendance_percentage >= 85, data = studperf)
 ```
 
-**Answer:** The students with attendance ≥ 85% have an average total score of `r mean(high_attend$total_score)` compared to `r mean(low_attend$total_score)` for students with attendance < 85%.
+**Answer:** The students with attendance ≥ 85% have an average total score of `r mean(high_attend$total_score)` compared to `r mean(low_attend$total_score)` for students with attendance < 85%.Therefore, it is not really true that students with attendance greater or equal to 85% perform better than those with attendance less than 85%.
 
 
 ### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
