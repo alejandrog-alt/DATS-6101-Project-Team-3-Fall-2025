@@ -211,18 +211,20 @@ studperfclean3 = outlierKD2(studperfclean2, class_participation, rm = TRUE, boxp
 studperfclean4 = outlierKD2(studperfclean3, total_score, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 ```
 
-# Answering the SMART QUESTIONS: 
+# Answering the SMART questions: 
 
 ### Q1: Do students with attendance ≥ 85% achieve higher average total scores than those with attendance < 85%?
 
+Creating a categorical variable for attendance
 ```{r}
-high_attend <- subset(studperf, attendance_percentage >= 85)
-low_attend  <- subset(studperf, attendance_percentage < 85)
+studperf$attendance_group <- ifelse(studperf$attendance_percentage >= 85, 
+                                   "High (≥85%)", "Low (<85%)")
 ```
 ```{r}
 # Create a new categorical variable for attendance
 studperf$attendance_group <- ifelse(studperf$attendance_percentage >= 85, "High (≥85%)", "Low (<85%)")
 
+<<<<<<< HEAD
 table(studperf$attendance_group)
 
 ```
@@ -236,12 +238,36 @@ high_mean <- mean(low_attend$total_score)
 
 
 T-test to check significance
+=======
+Checking the counts of each group
 ```{r}
-t.test(total_score ~ attendance_percentage >= 85, data = studperf)
+table(studperf$attendance_group)
 ```
 
-**Answer:** The students with attendance ≥ 85% have an average total score of `r mean(high_attend$total_score)` compared to `r mean(low_attend$total_score)` for students with attendance < 85%.Therefore, it is not really true that students with attendance greater or equal to 85% perform better than those with attendance less than 85%.
+Calculating average total scores for high attendace group 
+>>>>>>> 2351712 (Updated Q1 analysis based on t-test for attendance_group as categorical value)
+```{r}
+high_mean <- mean(subset(studperf, attendance_group == "High (≥85%)")$total_score)
+high_mean
+```
 
+<<<<<<< HEAD
+**Answer:** The students with attendance ≥ 85% have an average total score of `r mean(high_attend$total_score)` compared to `r mean(low_attend$total_score)` for students with attendance < 85%.Therefore, it is not really true that students with attendance greater or equal to 85% perform better than those with attendance less than 85%.
+=======
+Calculating average total scores for low attendace group 
+```{r}
+low_mean  <- mean(subset(studperf, attendance_group == "Low (<85%)")$total_score)
+low_mean
+```
+>>>>>>> 2351712 (Updated Q1 analysis based on t-test for attendance_group as categorical value)
+
+Running t-test to check significance
+```{r}
+t_test_result <- t.test(total_score ~ attendance_group, data = studperf)
+t_test_result
+```
+
+**Answer:** Answer: Students with attendance ≥ 85% have an average total score of `r high_mean`, while students with attendance < 85% have an average of `r low_mean`. The t-test p-value is `r round(t_test_result$p.value, 3)`, which indicates that the difference is `r ifelse(t_test_result$p.value < 0.05, "statistically significant", "not statistically significant")`. Therefore, students with higher attendance do `r ifelse(t_test_result$p.value < 0.05, "", "not")` necessarily achieve higher total scores in this dataset.
 
 ### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
 
@@ -250,7 +276,7 @@ Correlation
 correlation <- cor(studperf$weekly_self_study_hours, studperf$total_score, use = "complete.obs")
 ```
 
-Simple linear regression
+Simple linear regression 
 ```{r}
 model <- lm(total_score ~ weekly_self_study_hours, data = studperf)
 slope <- coef(model)[2]
