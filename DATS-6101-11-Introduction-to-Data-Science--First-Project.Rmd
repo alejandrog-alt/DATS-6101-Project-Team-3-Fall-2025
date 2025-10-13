@@ -74,26 +74,25 @@ total_score_mean <- mean(studperf$total_score, na.rm = T)
 total_score_sd   <- sd(studperf$total_score, na.rm = T)
 
 ```
-
 **Study Hours: **
 - Variance: `r study_hours_var`;
 - Mean: `r study_hours_mean`; 
-- Stabdard Deviation: `r study_hours_sd`
+- Standard Deviation: `r study_hours_sd`
 
 **Attendance: **
 - Variance: `r attendance_var`; 
 - Mean: `r attendance_mean`; 
-- Stabdard Deviation: `r attendance_sd`
+- Standard Deviation: `r attendance_sd`
 
 **Participation: **
 - Variance: `r participation_var`; 
 - Mean: `r participation_mean`; 
-- Stabdard Deviation: `r participation_sd`
+- Standard Deviation: `r participation_sd`
 
 **Total Score: **
 - Variance: `r total_score_var`; 
 - Mean: `r total_score_mean`; 
-- Stabdard Deviation: `r total_score_sd`
+- Standard Deviation: `r total_score_sd`
 
 
 Column names
@@ -210,84 +209,6 @@ studperfclean2 = outlierKD2(studperfclean, attendance_percentage, rm = TRUE, box
 studperfclean3 = outlierKD2(studperfclean2, class_participation, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 studperfclean4 = outlierKD2(studperfclean3, total_score, rm = TRUE, boxplt = TRUE, qqplt = TRUE)
 ```
-
-# Answering the SMART questions: 
-
-### Q1: Do students with attendance ≥ 85% achieve higher average total scores than those with attendance < 85%?
-
-Creating a categorical variable for attendance
-```{r}
-studperf$attendance_group <- ifelse(studperf$attendance_percentage >= 85, 
-                                   "High (≥85%)", "Low (<85%)")
-```
-
-Checking the counts of each group
-```{r}
-table(studperf$attendance_group)
-```
-
-Calculating average total scores for high attendace group 
-```{r}
-high_mean <- mean(subset(studperf, attendance_group == "High (≥85%)")$total_score)
-high_mean
-```
-
-Calculating average total scores for low attendace group 
-```{r}
-low_mean  <- mean(subset(studperf, attendance_group == "Low (<85%)")$total_score)
-low_mean
-```
-
-Running t-test to check significance
-```{r}
-t_test_result <- t.test(total_score ~ attendance_group, data = studperf)
-t_test_result
-```
-
-**Answer:** Answer: Students with attendance ≥ 85% have an average total score of `r high_mean`, while students with attendance < 85% have an average of `r low_mean`. The t-test p-value is `r round(t_test_result$p.value, 3)`, which indicates that the difference is `r ifelse(t_test_result$p.value < 0.05, "statistically significant", "not statistically significant")`. Therefore, students with higher attendance do `r ifelse(t_test_result$p.value < 0.05, "", "not")` necessarily achieve higher total scores in this dataset
-
-### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
-
-Correlation
-```{r}
-correlation <- cor(studperf$weekly_self_study_hours, studperf$total_score, use = "complete.obs")
-```
-
-Simple linear regression 
-```{r}
-model <- lm(total_score ~ weekly_self_study_hours, data = studperf)
-slope <- coef(model)[2]
-p_value <- summary(model)$coefficients[2, 4]
-```
-
-Plot
-```{r}
-ggplot(studperf, aes(x = weekly_self_study_hours, y = total_score)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", color = "blue") +
-  labs(
-    title = "Relationship between Study Hours and Total Score",
-    x = "Weekly Self-Study Hours",
-    y = "Total Score"
-  )
-```
-
-
-**Answer:** The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`, suggesting a `r ifelse(correlation > 0, "positive", "negative")` linear relationship.
-From the regression model, the slope coefficient is `r round(slope, 3)` with a p-value of `r signif(p_value, 3)`.
-This indicates that for each additional hour of self-study per week, the total score increases by approximately `r round(slope, 2)` points.
-Given that the p-value is `r ifelse(p_value < 0.05, "less than 0.05", "greater than 0.05")`, the relationship is `r ifelse(p_value < 0.05, "statistically significant", "not statistically significant")`.
-Therefore, there `r ifelse(p_value < 0.05, "is", "is no")` evidence of a meaningful linear relationship between weekly self-study hours and total scores.
-
-### Q4 : What are the average weekly study hours, attendance percentage, class participation, and total scores for all students in the dataset?
-
-Checking the dataframe again:
-```{r}
-studperf_summary <- studperfclean4
-colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
-xkablesummary(studperf_summary)
-```
-
 Note: The outliers were replaced by NAs. They were not deleted from the df. 
 
 ```{r}
@@ -311,6 +232,12 @@ sum(is.na(studperfclean4$class_participation))
 sum(is.na(studperfclean4$total_score))
 ```
 
+Checking the dataframe again:
+```{r}
+studperf_summary <- studperfclean4
+colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
+xkablesummary(studperf_summary)
+```
 
 A Scatterplot between Weekly Self Study Hours and Class Participation, with points colored by Grade
 ```{r echo=TRUE}
@@ -326,6 +253,72 @@ ggplot(studperfclean4, aes(x =weekly_self_study_hours , y = class_participation,
   theme_minimal()
 ```
 
+# Answering the SMART questions: 
+
+### Q1: Do students with attendance ≥ 85% achieve higher average total scores than those with attendance < 85%?
+
+Creating a categorical variable for attendance
+```{r}
+studperfclean4$attendance_group <- ifelse(studperfclean4$attendance_percentage >= 85, 
+                                   "High (≥85%)", "Low (<85%)")
+```
+
+Checking the counts of each group
+```{r}
+table(studperfclean4$attendance_group)
+```
+
+Calculating average total scores for high attendance group 
+```{r}
+high_mean <- mean(subset(studperfclean4, attendance_group == "High (≥85%)")$total_score)
+high_mean
+```
+
+Calculating average total scores for low attendace group 
+```{r}
+low_mean  <- mean(subset(studperfclean4, attendance_group == "Low (<85%)")$total_score)
+low_mean
+```
+
+Running t-test to check significance
+```{r}
+t_test_result <- t.test(total_score ~ attendance_group, data = studperfclean4)
+t_test_result
+```
+
+**Answer:** Answer: Students with attendance ≥ 85% have an average total score of `r high_mean`, while students with attendance < 85% have an average of `r low_mean`. The t-test p-value is `r round(t_test_result$p.value, 3)`, which indicates that the difference is `r ifelse(t_test_result$p.value < 0.05, "statistically significant", "not statistically significant")`. Therefore, students with higher attendance do `r ifelse(t_test_result$p.value < 0.05, "", "not")` necessarily achieve higher total scores in this dataset
+
+### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
+
+Correlation
+```{r}
+correlation <- cor(studperfclean4$weekly_self_study_hours, studperfclean4$total_score, use = "complete.obs")
+correlation
+```
+Simple linear regression 
+```{r}
+model <- lm(total_score ~ weekly_self_study_hours, data = studperfclean4)
+slope <- coef(model)[2]
+p_value <- summary(model)$coefficients[2, 4]
+```
+
+Plot
+```{r}
+ggplot(studperfclean4, aes(x = weekly_self_study_hours, y = total_score)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(
+    title = "Relationship between Study Hours and Total Score",
+    x = "Weekly Self-Study Hours",
+    y = "Total Score"
+  )
+```
+
+**Answer:** The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`, suggesting a `r ifelse(correlation > 0, "positive", "negative")` linear relationship.
+From the regression model, the slope coefficient is `r round(slope, 3)` with a p-value of `r signif(p_value, 3)`.
+This indicates that for each additional hour of self-study per week, the total score increases by approximately `r round(slope, 2)` points.
+Given that the p-value is `r ifelse(p_value < 0.05, "less than 0.05", "greater than 0.05")`, the relationship is `r ifelse(p_value < 0.05, "statistically significant", "not statistically significant")`.
+Therefore, there `r ifelse(p_value < 0.05, "is", "is no")` evidence of a meaningful linear relationship between weekly self-study hours and total scores.
 
 ### Q3: Are there any students who dedicate very few hours to studying but still achieve a higher  total_score?
 
@@ -342,10 +335,23 @@ few_but_high <- subset(studperfclean4,
 nrow(few_but_high); head(few_but_high)
 
 ```
+**Answer:** Yes `r nrow(few_but_high)` is > 0, so there are students who study very little (≤ 20th percentile of hours) and still score very high (≥ 90th percentile).
+
+### Q4 : What are the average weekly study hours, attendance percentage, class participation, and total scores for all students in the dataset?
+
+Average for each column
+```{r, echo=TRUE}
+
+study_hours_mean <- mean(studperfclean4$weekly_self_study_hours , na.rm = T)
+attendance_mean  <- mean(studperfclean4$attendance_percentage , na.rm = T)
+participation_mean <- mean(studperfclean4$class_participation , na.rm = T)
+total_score_mean <- mean(studperfclean4$total_score, na.rm = T)
+
+```
+
+**Answer:** Average of Weekly Study Hours, Attendance Percentage, Class Participation, and Total Scores are `r study_hours_mean`, `r attendance_mean`, `r participation_mean`, `r total_score_mean` respectively.
 
 ### Q5: Do students with unusually high total_score despite low study hours, attendance, and participation show significant anomalies?
-
-Low-effort and high scorers
 
 ```{r echo=TRUE}
 
@@ -366,13 +372,21 @@ low <- subset(studperfclean4,
 cut97 <- quantile(low$total_score, 0.977, na.rm=TRUE)
 low$anomaly <- low$total_score > cut97
 
-c(n_low = nrow(low),
-  cutoff = cut97,
-  observed = sum(low$anomaly),
-  rate = mean(low$anomaly) )
+n_low   <- nrow(low)
+cutoff  <- as.numeric(cut97)
+observed<- sum(low$anomaly)
+rate    <- mean(low$anomaly) * 100
+
 ```
+Low-effort and high scorers
 
+We defined low effort as the bottom 20% on study hours, attendance, and participation, and flagged "unusually high" total_score as above the 97.7th percentile within that low-effort group.
 
+**Answer:** Yes, there are `r nrow(low) ` students who scored unusually high even though they belong to the lowest 20% in study hours, attendance, and participation.
 
+Total low-effort students: `r n_low`
+High-score cutoff (97.7th pct): `r round(cutoff, 1)`
+Anomalies found: `r observed` students
+Rate: `r sprintf('%.2f%%', rate)`
 
-
+This small percentage shows these students are rare outliers, not a common pattern.
