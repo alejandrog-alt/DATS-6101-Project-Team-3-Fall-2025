@@ -32,6 +32,11 @@ options(scientific=T, digits = 3)
 # options(scipen=9, digits = 3) 
 ```
 
+**Research Topic: Analyse the Factors that Contribute to Student Performance**
+
+The study utilizes a synthetic Kaggle dataset. 
+
+
 # Summary of the dataset 
 
 Load the dataset into R
@@ -75,21 +80,25 @@ total_score_sd   <- sd(studperf$total_score, na.rm = T)
 
 ```
 **Study Hours: **
+
 - Variance: `r study_hours_var`;
 - Mean: `r study_hours_mean`; 
 - Standard Deviation: `r study_hours_sd`
 
 **Attendance: **
+
 - Variance: `r attendance_var`; 
 - Mean: `r attendance_mean`; 
 - Standard Deviation: `r attendance_sd`
 
 **Participation: **
+
 - Variance: `r participation_var`; 
 - Mean: `r participation_mean`; 
 - Standard Deviation: `r participation_sd`
 
 **Total Score: **
+
 - Variance: `r total_score_var`; 
 - Mean: `r total_score_mean`; 
 - Standard Deviation: `r total_score_sd`
@@ -138,6 +147,12 @@ studperf_summary <- studperf
 colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
 xkablesummary(studperf_summary)
 ```
+
+**Findings:**
+
+- There are no missing values in the data set
+- Most of the values fall within the 3rd quartile 
+- Under the Grade column, category A contains more values than any of the other four categories
 
 # Graphical representations of the data
 
@@ -280,13 +295,13 @@ low_mean  <- mean(subset(studperfclean4, attendance_group == "Low (<85%)")$total
 low_mean
 ```
 
-Running t-test to check significance
+Running t-test to examine the significance and see if this observed difference could have happened just by random chance
 ```{r}
 t_test_result <- t.test(total_score ~ attendance_group, data = studperfclean4)
 t_test_result
 ```
 
-**Answer:** Answer: Students with attendance ≥ 85% have an average total score of `r high_mean`, while students with attendance < 85% have an average of `r low_mean`. The t-test p-value is `r round(t_test_result$p.value, 3)`, which indicates that the difference is `r ifelse(t_test_result$p.value < 0.05, "statistically significant", "not statistically significant")`. Therefore, students with higher attendance do `r ifelse(t_test_result$p.value < 0.05, "", "not")` necessarily achieve higher total scores in this dataset
+**Answer:** Students with attendance ≥ 85% have an average total score of `r high_mean`, while students with attendance < 85% have an average of `r low_mean`. The t-test p-value is `r round(t_test_result$p.value, 3)`, which indicates that the difference is `r ifelse(t_test_result$p.value < 0.05, "statistically significant", "not statistically significant")`. Therefore, students with higher attendance do `r ifelse(t_test_result$p.value < 0.05, "", "not")` necessarily achieve higher total scores in this dataset
 
 ### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
 
@@ -310,9 +325,7 @@ ggplot(plot_data, aes(x = weekly_self_study_hours, y = total_score)) +
   theme_minimal()
 ```
 
-**Answer:**  
-The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`.  
-This value suggests a `r ifelse(correlation > 0, "positive", "negative")` relationship, meaning that as weekly self-study hours increase, total scores tend to `r ifelse(correlation > 0, "increase", "decrease")`.  
+**Answer:**  The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`. This value suggests a `r ifelse(correlation > 0, "positive", "negative")` relationship, meaning that as weekly self-study hours increase, total scores tend to `r ifelse(correlation > 0, "increase", "decrease")`.  
 
 The scatter plot further supports this trend, showing that students who spend more time studying generally achieve higher total scores.  
 However, correlation does **not imply causation**, and while there appears to be a linear pattern, other factors may also influence performance.
@@ -332,6 +345,7 @@ few_but_high <- subset(studperfclean4,
 nrow(few_but_high); head(few_but_high)
 
 ```
+
 **Answer:** Yes `r nrow(few_but_high)` is > 0, so there are students who study very little (≤ 20th percentile of hours) and still score very high (≥ 90th percentile).
 
 ### Q4 : What are the average weekly study hours, attendance percentage, class participation, and total scores for all students in the dataset?
@@ -375,6 +389,7 @@ observed<- sum(low$anomaly)
 rate    <- mean(low$anomaly) * 100
 
 ```
+
 Low-effort and high scorers
 
 We defined low effort as the bottom 20% on study hours, attendance, and participation, and flagged "unusually high" total_score as above the 97.7th percentile within that low-effort group.
@@ -387,3 +402,32 @@ Anomalies found: `r observed` students
 Rate: `r sprintf('%.2f%%', rate)`
 
 This small percentage shows these students are rare outliers, not a common pattern.
+
+# Reflections and Limitations
+
+The analysis provides several insights into student performance. We observed a strong positive correlation (r = 0.815) between weekly self-study hours and total scores, indicating that students who dedicate more time to self-study tend to achieve higher scores. The identification of low-effort yet high-performing students highlights that there are exceptional cases, suggesting that factors beyond study hours, attendance, and participation may influence performance, such as prior knowledge or learning strategies.
+
+**Limitations of the dataset and analysis:**
+
+- The dataset is cross-sectional; therefore, causality cannot be inferred from correlations or t-tests. 
+- Outlier removal was necessary to stabilize the analysis; however, this may slightly bias averages or variability.
+- Certain variables, such as `grade`, are categorical summaries of continuous performance and may hide subtle variations.
+- The dataset lacks information on student demographics, prior academic performance, or socioeconomic status, which could influence outcomes.
+- Statistical tests assume approximate normality of distributions; although the dataset is large, non-normality in some variables could affect small-effect comparisons.
+
+**Future improvements:**
+
+- Collect longitudinal data to better understand causality between study behaviors and performance.
+- Include additional explanatory variables (e.g., study environment, prior grades) to improve predictive insights.
+- Explore advanced modeling techniques such as multiple regression or mixed-effects models to account for multiple influencing factors simultaneously.
+
+This reflection helps contextualize the analysis, acknowledges potential biases, and suggests directions for further research.
+
+**References:**  
+
+- Taras, H. (2005), Nutrition and Student Performance at School. Journal of School Health, 75: 199-213. https://doi.org/10.1111/j.1746-1561.2005.tb06674.x
+- United States Environmental Protection Agency (2003). Indoor Environmental Division. Indoor Air Quality & Student Performance.  Washington, D.C: U.S.
+- Yaniv, R. and Shany, A. (2021), “Education Resources and Student Performance: Evidence from Arab Municipalities in Israel.” Applied economics 53.38): 4386–4403. 
+- Nabeel, G.M (n.d). Student Performance Dataset (Synthetic, Realistic). Kaggle 
+
+  
