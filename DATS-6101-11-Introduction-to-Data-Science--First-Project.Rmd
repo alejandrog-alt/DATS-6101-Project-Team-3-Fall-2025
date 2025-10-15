@@ -290,35 +290,32 @@ t_test_result
 
 ### Q2: Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
 
-Correlation
+Calculating the correlation between weekly self study hours vs total score
 ```{r}
 correlation <- cor(studperfclean4$weekly_self_study_hours, studperfclean4$total_score, use = "complete.obs")
 correlation
 ```
-Simple linear regression 
-```{r}
-model <- lm(total_score ~ weekly_self_study_hours, data = studperfclean4)
-slope <- coef(model)[2]
-p_value <- summary(model)$coefficients[2, 4]
-```
 
 Plot
 ```{r}
-ggplot(studperfclean4, aes(x = weekly_self_study_hours, y = total_score)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", color = "blue") +
+plot_data <- studperfclean4 %>% sample_n(min(5000, nrow(studperfclean4)))
+ggplot(plot_data, aes(x = weekly_self_study_hours, y = total_score)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "loess", se = FALSE, color = "red") +
   labs(
-    title = "Relationship between Study Hours and Total Score",
+    title = "Relationship between Weekly Self-Study Hours and Total Score",
     x = "Weekly Self-Study Hours",
     y = "Total Score"
-  )
+  ) +
+  theme_minimal()
 ```
 
-**Answer:** The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`, suggesting a `r ifelse(correlation > 0, "positive", "negative")` linear relationship.
-From the regression model, the slope coefficient is `r round(slope, 3)` with a p-value of `r signif(p_value, 3)`.
-This indicates that for each additional hour of self-study per week, the total score increases by approximately `r round(slope, 2)` points.
-Given that the p-value is `r ifelse(p_value < 0.05, "less than 0.05", "greater than 0.05")`, the relationship is `r ifelse(p_value < 0.05, "statistically significant", "not statistically significant")`.
-Therefore, there `r ifelse(p_value < 0.05, "is", "is no")` evidence of a meaningful linear relationship between weekly self-study hours and total scores.
+**Answer:**  
+The correlation coefficient between weekly self-study hours and total score is `r round(correlation, 3)`.  
+This value suggests a `r ifelse(correlation > 0, "positive", "negative")` relationship, meaning that as weekly self-study hours increase, total scores tend to `r ifelse(correlation > 0, "increase", "decrease")`.  
+
+The scatter plot further supports this trend, showing that students who spend more time studying generally achieve higher total scores.  
+However, correlation does **not imply causation**, and while there appears to be a linear pattern, other factors may also influence performance.
 
 ### Q3: Are there any students who dedicate very few hours to studying but still achieve a higher  total_score?
 
