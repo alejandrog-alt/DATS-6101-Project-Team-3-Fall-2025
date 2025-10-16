@@ -215,7 +215,7 @@ ggplot(plot_studperf, aes(x=grade)) +
         title="Barplot of Grade in Student Performance Dataset") 
 ```
 
-*Outlier Check for the variables: weekly study hours, attendance, class participation and total score. We use the ezids package*
+*Outlier Check for the variables: weekly study hours, attendance, class participation and total score respectively. We use the ezids package*
 
 ```{r echo=TRUE}
 
@@ -252,20 +252,6 @@ Checking the dataframe again:
 studperf_summary <- studperfclean4
 colnames(studperf_summary)[1:6]=c("Student ID","Weekly Study Hours","Attendance Percentage","Class Participation","Total Score","Grade")
 xkablesummary(studperf_summary)
-```
-
-A Scatterplot between Weekly Self Study Hours and Class Participation, with points colored by Grade
-```{r echo=TRUE}
-
-ggplot(studperfclean4, aes(x =weekly_self_study_hours , y = class_participation, color = grade)) +
-  geom_point(size = 3, alpha = 0.7) +
-  labs(
-    title = "Scatterplot of Weekly Self Study Hours and Class Participation Colored by Grade",
-    x = "Weekly Self Study Hours",
-    y = "Class Participation",
-    color = "Grade"
-  ) +
-  theme_minimal()
 ```
 
 # Answering the SMART questions: 
