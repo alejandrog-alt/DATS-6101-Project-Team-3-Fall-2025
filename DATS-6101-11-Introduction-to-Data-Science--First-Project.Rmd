@@ -32,18 +32,23 @@ options(scientific=T, digits = 3)
 # options(scipen=9, digits = 3) 
 ```
 
+# Introduction 
+
 The study will utilize a synthetic dataset (obtained from Kaggle) containing 1,000,000 rows and 6 columns with the variables: student_id, weekly_self_study_hours, attendance_percentage, class_participation, total_score, and grade. With all numerics, except the header row and grade column, makes the data set ideal for exploratory data analysis and deriving insights to understand the performance of each student. By quantifying the data and applying relevant statistical tools such as summary statistics, descriptive statistics, ggplot2 among others, we can better perceive the data and make sound conclusions. There is research that considers other factors of student performance such as nutrition and student performance by Taras Howard (2005); indoor air quality and student performance by the United States Environmental Protection Agency (2003); education resources and student performance by Yaniv, R and Adi, Y (2021). They are all mostly external factors that can affect the performance of a student. Our study narrows the focus down to the internal factors or what could be described as accessible by all students against their total scores.
 
-Research Topic: Analyse the Factors that Contribute to Student Performance
+# Research Topic: Analyse the Factors that Contribute to Student Performance
 
 *SMART Questions of the Research* 
+
 1.	Do students with attendance ≥ 85% achieve higher average total scores than those with attendance < 85%?
 2.	Is there a linear relationship between the number of weekly self-study hours and a student’s total_score?
 3.	Are there any students who dedicate very few hours to studying but still achieve a higher  total_score?
 4.	What are the average weekly study hours, attendance percentage,class  participation and total scores for all students in the dataset?
 5.	Do students with unusually high total_score despite low study hours, attendance, and participation show significant anomalies?
 
-*Summary of the dataset* 
+
+
+# Summary of the dataset
 
 Load the data set into R.
 
@@ -118,7 +123,7 @@ Unique values
 sapply(studperf, function(x) length(unique(x)))
 ```
 
-Descriptive statistics
+# Descriptive statistics
 
 **How many observations are in this data set?**
 ```{r, echo=TRUE}
